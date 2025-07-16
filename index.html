@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cek Pemadaman PLN - ULP Tulungagung</title>
-<link rel="icon" href="pln.png" type="image/png" />
+  <link rel="icon" href="pln.png" type="image/png" />
+  <link rel="shortcut icon" href="pln.png" type="image/png" />
 
-<!-- Tambahan untuk thumbnail logo PLN saat dibagikan -->
-<meta property="og:title" content="Cek Pemadaman PLN - ULP Tulungagung" />
-<meta property="og:description" content="Cari apakah ID Pelanggan atau Nomor Meter Anda terdampak pemadaman listrik terencana." />
-<meta property="og:image" content="https://namakamu.github.io/pln.png" />
-<meta property="og:url" content="https://namakamu.github.io/" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary_large_image" />
+  <!-- Metadata untuk thumbnail saat dibagikan -->
+  <meta property="og:title" content="Cek Pemadaman PLN - ULP Tulungagung" />
+  <meta property="og:description" content="Cari apakah ID Pelanggan atau Nomor Meter Anda terdampak pemadaman listrik terencana." />
+  <meta property="og:image" content="https://infoplnngunut.github.io/tulungagung/pln.png" />
+  <meta property="og:url" content="https://infoplnngunut.github.io/tulungagung/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
 
   <style>
     body {
@@ -72,6 +73,15 @@
       font-weight: 600;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
+    .loading::after {
+      content: ' ⏳';
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0% { opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
     .logo {
       display: block;
       margin: 0 auto 1em auto;
@@ -101,11 +111,17 @@
     </p>
   </section>
 
+  <noscript>
+    <p style="color:red; text-align:center;">
+      Mohon aktifkan JavaScript untuk menggunakan fitur pencarian ini.
+    </p>
+  </noscript>
+
 <script>
   const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSQyPNSARpSQVRT7dINYHuFc7KUFqAdREmUakv6p-7zKvXWA2rTgQ6JOR3HMHM9_Fk9aDWa3EQOGiHU/pub?output=csv';
 
   async function fetchDataFromSheet() {
-    const response = await fetch(sheetUrl);
+    const response = await fetch(sheetUrl + '&t=' + Date.now());
     const csv = await response.text();
     const rows = csv.trim().split('\n').slice(1);
     return rows.map(row => {
@@ -160,10 +176,12 @@
     }
 
     resultDiv.textContent = 'Memuat data...';
+    resultDiv.classList.add('loading');
 
     try {
       const data = await fetchDataFromSheet();
       const ditemukan = data.find(d => d.id === input || d.nomorMeter === input);
+      resultDiv.classList.remove('loading');
 
       if (ditemukan) {
         resultDiv.style.backgroundColor = '#d4edda';
@@ -184,6 +202,7 @@
         resultDiv.textContent = 'Data tidak ditemukan atau tidak terdampak pemadaman.';
       }
     } catch (e) {
+      resultDiv.classList.remove('loading');
       resultDiv.style.backgroundColor = '#f8d7da';
       resultDiv.style.color = '#721c24';
       resultDiv.textContent = 'Gagal mengambil data. Coba lagi nanti.';
